@@ -1,0 +1,14 @@
+{
+  "name": "temperaturenotifier",
+  "version": "1.0.0",
+  "description": "Alert when temperature reaches or exceeds a threshold",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "sqlite3": "^4.0.1"
+  }
+}
