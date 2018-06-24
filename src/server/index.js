@@ -2,8 +2,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const { graphqlExpress, graphiqlExpress } = require("apollo-server-express");
 const { makeExecutableSchema } = require("graphql-tools");
-const deviceFile = '/sys/bus/w1/devices/0117b2112cff/w1_slave';
+const deviceFile = "/sys/bus/w1/devices/0117b2112cff/w1_slave";
 
+const typeDefs = [
   `
 type Query {
   hello: String
@@ -14,16 +15,16 @@ schema {
 }`
 ];
 
-const lineReader = require('readline').createInterface({
-    input: require('fs').createReadStream(deviceFile)
-  });
+const lineReader = require("readline").createInterface({
+  input: require("fs").createReadStream(deviceFile)
+});
 
 const resolvers = {
   Query: {
     hello(root) {
-        lineReader.on('line', function (line) {
-            console.log('Line from file:', line);
-          });
+      lineReader.on("line", function(line) {
+        console.log("Line from file:", line);
+      });
     }
   }
 };
