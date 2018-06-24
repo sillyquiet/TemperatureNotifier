@@ -23,7 +23,7 @@ const resolvers = {
   Query: {
     hello(root) {
       lineReader.on("line", function(line) {
-        console.log("Line from file:", line);
+        return line;
       });
     }
   }
