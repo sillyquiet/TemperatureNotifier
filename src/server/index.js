@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const { graphqlExpress, graphiqlExpress } = require("apollo-server-express");
 const { makeExecutableSchema } = require("graphql-tools");
-const deviceFile = "/sys/bus/w1/devices/0117b2112cff/w1_slave";
+const deviceFile = "/sys/bus/w1/devices/28-0117b2112cff/w1_slave";
 
 const typeDefs = [
   `
