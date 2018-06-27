@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const fs = require("fs");
+const cors = require("cors");
 const path = require("path");
 const { graphqlExpress, graphiqlExpress } = require("apollo-server-express");
 const { makeExecutableSchema } = require("graphql-tools");
@@ -70,14 +71,22 @@ const resolvers = {
             return readSensorHW();
         },
         timestamp() {
-            return Date.now();
+            return new Date().toUTCString();
         }
     }
 };
-
+var corsOptions = {
+    origin: "*",
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 const app = express();
-app.use("/graphql", bodyParser.json(), graphqlExpress({ schema }));
+app.use(
+    "/graphql",
+    cors(corsOptions),
+    bodyParser.json(),
+    graphqlExpress({ schema })
+);
 app.use("/graphiql", graphiqlExpress({ endpointURL: "/graphql" }));
 app.listen(4000, () => console.log("Now browse to localhost:4000/graphiql"));
 ``;

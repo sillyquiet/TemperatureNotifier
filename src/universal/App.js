@@ -1,21 +1,39 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { Query } from "react-apollo";
+import gql from "graphql-tag";
+import moment from "moment";
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
-    );
-  }
-}
+import "./App.css";
+
+const App = () => (
+    <Query
+        query={gql`
+            {
+                temperature {
+                    celsius
+                    fahrenheit
+                }
+                timestamp
+            }
+        `}
+        pollInterval={1000}
+    >
+        {({ loading, error, data }) => {
+            if (loading) return <p>Loading...</p>;
+            if (error) return <p>Error :(</p>;
+
+            return (
+                <div>
+                    <p>Temperature</p>
+                    <span>{`${moment(data.timestamp).format(
+                        "H:mm:ss"
+                    )}  --   Celsius: ${
+                        data.temperature.celsius
+                    }  --   Fahrenheit: ${data.temperature.fahrenheit}`}</span>
+                </div>
+            );
+        }}
+    </Query>
+);
 
 export default App;
