@@ -5,6 +5,8 @@ import moment from "moment";
 
 import "./App.css";
 
+const formatNumber = raw => raw.toFixed(1);
+
 const App = () => (
     <Query
         query={gql`
@@ -16,7 +18,7 @@ const App = () => (
                 timestamp
             }
         `}
-        pollInterval={1000}
+        pollInterval={2000}
     >
         {({ loading, error, data }) => {
             if (loading) return <p>Loading...</p>;
@@ -27,9 +29,11 @@ const App = () => (
                     <p>Temperature</p>
                     <span>{`${moment(data.timestamp).format(
                         "H:mm:ss"
-                    )}  --   Celsius: ${
+                    )}  --  ${formatNumber(
                         data.temperature.celsius
-                    }  --   Fahrenheit: ${data.temperature.fahrenheit}`}</span>
+                    )} °C  --  ${formatNumber(
+                        data.temperature.fahrenheit
+                    )} °F`}</span>
                 </div>
             );
         }}
