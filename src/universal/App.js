@@ -1,43 +1,45 @@
 import React from "react";
-import { Query } from "react-apollo";
+import { Subscription } from "react-apollo";
 import gql from "graphql-tag";
 import moment from "moment";
 
 import "./App.css";
 
 const formatNumber = raw => raw.toFixed(1);
+const TEMP_SUBSCRIPTION = gql`
+    subscription tempUpdated {
+        updatedTemp {
+            temperature {
+                celsius
+                fahrenheit
+            }
+            timestamp
+        }
+    }
+`;
 
 const App = () => (
-    <Query
-        query={gql`
-            {
-                temperature {
-                    celsius
-                    fahrenheit
-                }
-                timestamp
-            }
-        `}
-        pollInterval={2000}
-    >
+    <Subscription subscription={TEMP_SUBSCRIPTION}>
         {({ loading, error, data }) => {
             if (loading) return <p>Loading...</p>;
             if (error) return <p>Error :(</p>;
-
+            if (!data || !data.updatedTemp) return <p>Nothing to see yet!</p>;
+            const {
+                timestamp,
+                temperature: { celsius, fahrenheit } = {}
+            } = data.updatedTemp;
             return (
                 <div>
                     <p>Temperature</p>
-                    <span>{`${moment(data.timestamp).format(
+                    <span>{`${moment(timestamp).format(
                         "H:mm:ss"
-                    )}  --  ${formatNumber(
-                        data.temperature.celsius
-                    )} °C  --  ${formatNumber(
-                        data.temperature.fahrenheit
+                    )}  --  ${formatNumber(celsius)} °C  --  ${formatNumber(
+                        fahrenheit
                     )} °F`}</span>
                 </div>
             );
         }}
-    </Query>
+    </Subscription>
 );
 
 export default App;
