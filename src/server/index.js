@@ -44,18 +44,25 @@ const compareTemps = (a, b) =>
 let prevReading;
 
 const getReading = async () => {
-    const temperature = await readSensorHW();
-    const reading = { temperature, timestamp: timestamp() };
-    return reading;
+    try {
+        return await readSensorHW();
+    } catch (err) {
+        console.log(err.message);
+        return {};
+    }
 };
 
-const readLoop = async () => {
+const readLoop = () => {
     timer = setInterval(async () => {
-        const reading = await getReading();
-        if (compareTemps(reading.temperature.celsius, prevReading)) {
-            prevReading = reading.temperature.celsius;
+        const temperature = await getReading();
+        console.log("Got temp", temperature);
+        if (compareTemps(temperature.celsius, prevReading)) {
+            prevReading = temperature.celsius;
             const success = pubsub.publish("tempUpdated", {
-                updatedTemp: reading
+                updatedTemp: {
+                    temperature,
+                    timestamp: new Date().toUTCString()
+                }
             });
             console.log("Published:", success);
         }
@@ -67,26 +74,27 @@ const readSensorHW = () => {
         const sensor_path = `/sys/bus/w1/devices/${deviceName}/w1_slave`;
         // const sensor_path = "src/server/sensorMock";
 
-        fs.access(sensor_path, fs.constants.R_OK, err => {
-            if (err) {
-                reject(`${sensor_path} cannot be accessed: ${err}`);
-            }
+        try {
+            fs.accessSync(sensor_path, fs.constants.F_OK | fs.constants.R_OK);
             fs.readFile(sensor_path, { encoding: "utf8" }, (err, data) => {
                 if (err) {
-                    reject(err);
+                    throw err;
+                }
+                if (!data) {
+                    throw "No sensor data";
                 }
                 const lines = data.split("\n");
                 if (lines.length < 2) {
-                    reject(`Invalid sensor data: ${data}`);
+                    throw `Invalid sensor data: ${data}`;
                 }
                 if (!lines[0].match(/ YES$/)) {
-                    reject(`Checksum error reading sensor ${name}`);
+                    throw `Checksum error reading sensor ${name}`;
                 }
 
                 const temp_pattern = /t=-?\d*/;
                 let temp_string = temp_pattern.exec(lines[1]);
                 if (temp_string === null) {
-                    reject(`Parsing error reading sensor ${name}`);
+                    throw `Parsing error reading sensor ${name}`;
                 }
                 temp_string = String(temp_string).substr(2);
                 const celsius = parseFloat(temp_string) / 1000;
@@ -95,19 +103,17 @@ const readSensorHW = () => {
 
                 resolve({ celsius, fahrenheit });
             });
-        });
+        } catch (err) {
+            reject(err);
+            return;
+        }
     });
 };
 
 const resolvers = {
     Query: {
         temperature() {
-            try {
-                return readSensorHW();
-            } catch (err) {
-                console.log(err);
-                return null;
-            }
+            return getReading();
         },
         timestamp() {
             return new Date().toUTCString();
