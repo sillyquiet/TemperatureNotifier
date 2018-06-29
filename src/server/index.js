@@ -91,7 +91,7 @@ const readSensorHW = () => {
 
                 const fahrenheit = celsius * 1.8 + 32;
 
-                resolve({ celsius, fahrenheit });
+                resolve({ celsius.toFixed(3), fahrenheit.toFixed(3) });
             });
         });
     });
