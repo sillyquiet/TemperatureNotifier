@@ -39,6 +39,7 @@ schema {
 let timer;
 
 const timestamp = () => new Date().toUTCString();
+let prevReading;
 
 const getReading = async () => {
     const temperature = await readSensorHW();
@@ -49,9 +50,13 @@ const getReading = async () => {
 const readLoop = async () => {
     timer = setInterval(async () => {
         const reading = await getReading();
-        console.log(reading);
-        const success = pubsub.publish("tempUpdated", { updatedTemp: reading });
-        console.log("Published:", success);
+        if (reading.temperature.celsius !== prevReading) {
+            prevReading = reading.temperature.celsius;
+            const success = pubsub.publish("tempUpdated", {
+                updatedTemp: reading
+            });
+            console.log("Published:", success);
+        }
     }, 1000);
 };
 
