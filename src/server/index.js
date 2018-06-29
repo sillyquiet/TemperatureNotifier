@@ -39,6 +39,8 @@ schema {
 let timer;
 
 const timestamp = () => new Date().toUTCString();
+const compareTemps = (a, b) =>
+    new Number(a).toFixed(3).toString() !== new Number(b).toFixed(3).toString();
 let prevReading;
 
 const getReading = async () => {
@@ -50,7 +52,7 @@ const getReading = async () => {
 const readLoop = async () => {
     timer = setInterval(async () => {
         const reading = await getReading();
-        if (reading.temperature.celsius !== prevReading) {
+        if (compareTemps(reading.temperature.celsius, prevReading)) {
             prevReading = reading.temperature.celsius;
             const success = pubsub.publish("tempUpdated", {
                 updatedTemp: reading
@@ -63,7 +65,7 @@ const readLoop = async () => {
 const readSensorHW = () => {
     return new Promise((resolve, reject) => {
         const sensor_path = `/sys/bus/w1/devices/${deviceName}/w1_slave`;
-        //const sensor_path = "src/server/sensorMock";
+        // const sensor_path = "src/server/sensorMock";
 
         fs.access(sensor_path, fs.constants.R_OK, err => {
             if (err) {
@@ -91,7 +93,7 @@ const readSensorHW = () => {
 
                 const fahrenheit = celsius * 1.8 + 32;
 
-                resolve({ celsius.toFixed(3), fahrenheit.toFixed(3) });
+                resolve({ celsius, fahrenheit });
             });
         });
     });
@@ -100,7 +102,12 @@ const readSensorHW = () => {
 const resolvers = {
     Query: {
         temperature() {
-            return readSensorHW();
+            try {
+                return readSensorHW();
+            } catch (err) {
+                console.log(err);
+                return null;
+            }
         },
         timestamp() {
             return new Date().toUTCString();
