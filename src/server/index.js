@@ -55,16 +55,14 @@ const getReading = async () => {
 const readLoop = () => {
     timer = setInterval(async () => {
         const temperature = await getReading();
-        console.log("Got temp", temperature);
         if (compareTemps(temperature.celsius, prevReading)) {
             prevReading = temperature.celsius;
-            const success = pubsub.publish("tempUpdated", {
-                updatedTemp: {
-                    temperature,
-                    timestamp: new Date().toUTCString()
-                }
-            });
-            console.log("Published:", success);
+            const updatedTemp = {
+                temperature,
+                timestamp: new Date().toUTCString()
+            };
+            const success = pubsub.publish("tempUpdated", { updatedTemp });
+            console.log("Published: ", success, updatedTemp);
         }
     }, 1000);
 };
