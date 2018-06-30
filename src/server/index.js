@@ -40,7 +40,7 @@ let timer;
 
 const timestamp = () => new Date().toUTCString();
 const compareTemps = (a, b) =>
-    new Number(a).toFixed(3).toString() !== new Number(b).toFixed(3).toString();
+    new Number(a).toFixed(1).toString() !== new Number(b).toFixed(1).toString();
 let prevReading;
 
 const getReading = async () => {
