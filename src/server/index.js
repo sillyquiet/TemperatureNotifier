@@ -28,15 +28,19 @@ let sigint;
 
 let fans;
 
+const fansOK = () => {
+    return fans && !sigint && Gpio.accessible;
+};
+
 const fansOn = () => {
-    if (!sigint && Gpio.accessible && fans.readSync() === Gpio.HIGH) {
+    if (fansOK() && fans.readSync() === Gpio.HIGH) {
         const val = fans.writeSync(Gpio.LOW);
         console.log("Turning fan on");
     }
 };
 
 const fansOff = () => {
-    if (!sigint && Gpio.accessible && fans.readSync() === Gpio.LOW) {
+    if (fansOk() && fans.readSync() === Gpio.LOW) {
         const val = fans.writeSync(Gpio.HIGH);
         console.log("Turning fan off");
     }
