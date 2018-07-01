@@ -41,6 +41,7 @@ const initFans = () => {
     try {
         Gpio = require("onoff");
     } catch (err) {
+        console.log(`Err: ${err}, using mock`);
         Gpio = GpioMock;
     }
 
@@ -53,12 +54,8 @@ const initFans = () => {
             process.exit(0);
         });
     } else {
-        fans = {
-            writeSync: value => {},
-            readSync: () => {
-                return 0;
-            }
-        };
+        Gpio = GpioMock;
+        fans = new Gpio(27, "out");
     }
 
     return fans;
