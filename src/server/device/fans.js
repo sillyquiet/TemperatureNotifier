@@ -1,6 +1,13 @@
 let Gpio;
 let fans;
 
+try {
+    Gpio = require("onoff");
+} catch (err) {
+    console.log(`Err: ${err}, using mock`);
+    Gpio = GpioMock;
+}
+
 class GpioMock {
     constructor(port, direction) {
         this.value = 0;
@@ -38,13 +45,6 @@ const fansOff = () => {
 };
 
 const initFans = () => {
-    try {
-        Gpio = require("onoff");
-    } catch (err) {
-        console.log(`Err: ${err}, using mock`);
-        Gpio = GpioMock;
-    }
-
     if (Gpio.accessible) {
         fans = new Gpio(27, "out");
         fans.writeSync(Gpio.HIGH);
