@@ -25,8 +25,21 @@ const pubsub = new PubSub();
 
 const deviceName = "28-0117b2112cff";
 
-const getFans = () => {
-    let fans;
+let fans;
+
+const fansOn = () => {
+    if (Gpio.accessible && fans.readSync() === Gpio.HIGH) {
+        const val = fans.write(Gpio.LOW);
+    }
+};
+
+const fansOff = () => {
+    if (Gpio.accessible && fans.readSync() === Gpio.LOW) {
+        const val = fans.write(Gpio.HIGH);
+    }
+};
+
+const initFans = () => {
     if (Gpio.accessible) {
         fans = new Gpio(27, "out");
     } else {
@@ -94,17 +107,17 @@ const getReading = async () => {
 let counter;
 const THRESHOLD = 25.0;
 
-const readLoop = fans => {
+const readLoop = () => {
     counter = 0;
     timer = setInterval(async () => {
         counter++;
         const temperature = await getReading();
         const fanLoop = counter % 10 === 0;
         if (fanLoop && temperature.celsius > THRESHOLD) {
-            fans.writeSync(Gpio.LOW);
+            fansOn();
             console.log(`Turn fan on for temperature ${temperature.celsius}`);
         } else if (fanLoop && temperature.celsius <= THRESHOLD) {
-            fans.writeSync(Gpio.HIGH);
+            fansOff();
             console.log(`Turn fan off for temperature ${temperature.celsius}`);
         }
         if (compareTemps(temperature.celsius, prevReading)) {
@@ -199,9 +212,16 @@ server.use(
 
 // Wrap the Express server
 const ws = createServer(server);
+
+initFans();
+process.on("SIGINT", () => {
+    fans.unexport();
+});
+
 ws.listen(PORT, () => {
     console.log(`Apollo Server is now running on http://raspberrypi:${PORT}`);
-    readLoop(getFans());
+
+    readLoop();
     // Set up the WebSocket for handling GraphQL subscriptions
     new SubscriptionServer(
         {
