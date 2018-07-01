@@ -30,25 +30,15 @@ let fans;
 
 const fansOn = () => {
     if (!sigint && Gpio.accessible && fans.readSync() === Gpio.HIGH) {
-        const val = fans.write(Gpio.LOW, (err) => {
-            if (err){
-                console.log(`Could not turn fan on ${err}`);
-                return;
-            }
-            console.log("Turning fan on");
-        });
+        const val = fans.writeSync(Gpio.LOW);
+        console.log("Turning fan on");
     }
 };
 
 const fansOff = () => {
     if (!sigint && Gpio.accessible && fans.readSync() === Gpio.LOW) {
-        const val = fans.write(Gpio.HIGH, err) => {
-            if (err){
-                console.log(`Could not turn fan off ${err}`);
-                return;
-            }
-            console.log("Turning fan off");
-        });
+        const val = fans.writeSync(Gpio.HIGH);
+        console.log("Turning fan off");
     }
 };
 
@@ -58,9 +48,10 @@ const initFans = () => {
         sigint = false;
     } else {
         fans = {
-            writeSync: function(value) {
+            writeSync: value => {
                 console.log("virtual fan now uses value: " + value);
-            }
+            },
+            readSync
         };
     }
     return fans;
@@ -126,7 +117,7 @@ const readLoop = () => {
     timer = setInterval(async () => {
         counter++;
         const temperature = await getReading();
-        const fanLoop = counter % 10 === 0;
+        const fanLoop = counter !== 0 && counter % 10 === 0;
         if (fanLoop && temperature.celsius > THRESHOLD) {
             fansOn();
         } else if (fanLoop && temperature.celsius <= THRESHOLD) {
@@ -227,7 +218,7 @@ const ws = createServer(server);
 
 initFans();
 process.on("SIGINT", () => {
-    console.log('Received sigint, disconnecting');
+    console.log("Received sigint, disconnecting");
     sigint = true;
     fans.unexport();
 });
