@@ -221,6 +221,7 @@ process.on("SIGINT", () => {
     console.log("Received sigint, disconnecting");
     sigint = true;
     fans.unexport();
+    process.exit(0);
 });
 
 ws.listen(PORT, () => {
