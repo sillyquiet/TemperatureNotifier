@@ -61,6 +61,8 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
+    "start:server": "node src/server/index.js",
+    "install:server": "npm install && npm install 'onoff'",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js --env=jsdom",
     "flow": "flow"
