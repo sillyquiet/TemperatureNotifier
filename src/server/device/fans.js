@@ -1,4 +1,7 @@
-const Gpio = require("onoff");
+let Gpio;
+try {
+    Gpio = require("onoff").Gpio;
+} catch (err) {}
 
 let fans;
 
