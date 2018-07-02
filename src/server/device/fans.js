@@ -1,12 +1,11 @@
 let Gpio;
-let fans;
-
 try {
     Gpio = require("onoff");
 } catch (err) {
-    console.log(`Err: ${err}, using mock`);
-    Gpio = GpioMock;
+    console.log("Cannot load onoff on this device, using mock");
 }
+
+let fans;
 
 class GpioMock {
     constructor(port, direction) {
@@ -45,7 +44,7 @@ const fansOff = () => {
 };
 
 const initFans = () => {
-    if (Gpio.accessible) {
+    if (Gpio && Gpio.accessible) {
         fans = new Gpio(27, "out");
         fans.writeSync(Gpio.HIGH);
         process.on("SIGINT", () => {
@@ -55,7 +54,7 @@ const initFans = () => {
         });
     } else {
         Gpio = GpioMock;
-        fans = new Gpio(27, "out");
+        fans = new GpioMock(27, "out");
     }
 
     return fans;
