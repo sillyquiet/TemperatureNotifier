@@ -1,7 +1,4 @@
-let Gpio;
-try {
-    Gpio = require("onoff");
-} catch (err) {}
+const Gpio = require("onoff");
 
 let fans;
 
