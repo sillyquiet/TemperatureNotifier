@@ -1,9 +1,7 @@
 let Gpio;
 try {
     Gpio = require("onoff");
-} catch (err) {
-    console.log("Cannot load onoff on this device, using mock");
-}
+} catch (err) {}
 
 let fans;
 
@@ -53,6 +51,7 @@ const initFans = () => {
             process.exit(0);
         });
     } else {
+        console.log("Cannot load onoff on this device, using mock");
         Gpio = GpioMock;
         fans = new GpioMock(27, "out");
     }
