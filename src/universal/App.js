@@ -26,7 +26,7 @@ const TEMP_SUBSCRIPTION = gql`
 const Temperature = ({ timestamp, celsius, fahrenheit, title }) => {
     return (
         <div>
-            <p>{title}</p>
+            <h3>{title}</h3>
             <span>{`${moment(timestamp).format("H:mm:ss")}  --  ${formatNumber(
                 celsius
             )} °C  --  ${formatNumber(fahrenheit)} °F`}</span>
