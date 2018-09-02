@@ -10,7 +10,7 @@ const { execute, subscribe } = require("graphql");
 const { createServer } = require("http");
 const { SubscriptionServer } = require("subscriptions-transport-ws");
 const { initFans, fansOff, fansOn } = require("./device/fans");
-const { getReading } = require("./device/sensors");
+const { getInternalReading, getExternalReading } = require("./device/sensors");
 
 const pubsub = new PubSub();
 
@@ -23,7 +23,8 @@ type Temperature {
 }
 
 type Query {
-    temperature: Temperature
+    internalTemperature: Temperature
+    externalTemperature: Temperature
     timestamp: String
 }
 
@@ -39,40 +40,46 @@ schema {
 let timer;
 
 const timestamp = () => new Date().toUTCString();
-const compareTemps = (a, b) =>
+const tempsAreEqual = (a, b) =>
     new Number(a).toFixed(1).toString() !== new Number(b).toFixed(1).toString();
+
 let prevReading;
 
 let counter;
-const THRESHOLD = 25.0;
+const THRESHOLD = 12.0;
 
 const readLoop = () => {
     counter = 0;
     timer = setInterval(async () => {
         counter++;
-        const temperature = await getReading();
+        const internalTemperature = await getInternalReading();
+        const externalTemperature = await getExternalReading();
+        const temperatureDiffence =
+            internalTemperature.celsius - externalTemperature.celsius;
         const fanLoop = counter !== 0 && counter % 10 === 0;
-        if (fanLoop && temperature.celsius > THRESHOLD) {
+        if (fanLoop && temperatureDiffence > THRESHOLD) {
             fansOn();
-        } else if (fanLoop && temperature.celsius <= THRESHOLD) {
+        } else if (fanLoop && temperatureDiffence <= THRESHOLD) {
             fansOff();
         }
-        if (compareTemps(temperature.celsius, prevReading)) {
-            prevReading = temperature.celsius;
-            const updatedTemp = {
-                temperature,
-                timestamp: new Date().toUTCString()
-            };
-            const success = pubsub.publish("tempUpdated", { updatedTemp });
-            console.log("Published: ", success, updatedTemp);
-        }
+        prevReading = internalTemperature.celsius;
+        const updatedTemp = {
+            internalTemperature,
+            externalTemperature,
+            timestamp: new Date().toUTCString()
+        };
+        const success = pubsub.publish("tempUpdated", { updatedTemp });
+        console.log("Published: ", success, updatedTemp);
     }, 1000);
 };
 
 const resolvers = {
     Query: {
-        temperature() {
-            return getReading();
+        internalTemperature() {
+            return getInternalReading();
+        },
+        externalTemperature() {
+            return getExternalReading();
         },
         timestamp() {
             return new Date().toUTCString();

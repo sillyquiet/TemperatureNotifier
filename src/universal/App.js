@@ -9,7 +9,11 @@ const formatNumber = raw => raw.toFixed(1);
 const TEMP_SUBSCRIPTION = gql`
     subscription tempUpdated {
         updatedTemp {
-            temperature {
+            externalTemperature {
+                celsius
+                fahrenheit
+            }
+            internalTemperature {
                 celsius
                 fahrenheit
             }
@@ -26,16 +30,23 @@ const App = () => (
             if (!data || !data.updatedTemp) return <p>Nothing to see yet!</p>;
             const {
                 timestamp,
-                temperature: { celsius, fahrenheit } = {}
+                internalTemperature: {
+                    celsius: internalCelsius,
+                    fahrenheit: internalFahrenheit
+                } = {},
+                externalTemperature: {
+                    celsius: externalCelsius,
+                    fahrenheit: externalFahrenheit
+                } = {}
             } = data.updatedTemp;
             return (
                 <div>
                     <p>Temperature</p>
                     <span>{`${moment(timestamp).format(
                         "H:mm:ss"
-                    )}  --  ${formatNumber(celsius)} °C  --  ${formatNumber(
-                        fahrenheit
-                    )} °F`}</span>
+                    )}  --  ${formatNumber(
+                        internalCelsius
+                    )} °C  --  ${formatNumber(internalFahrenheit)} °F`}</span>
                 </div>
             );
         }}

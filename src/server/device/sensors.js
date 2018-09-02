@@ -1,31 +1,41 @@
 const fs = require("fs");
 
-const deviceName = "28-0117b2112cff";
+const sensors = { external: "28-00000a29795e", internal: "28-0117b2112cff" }; // make this configurable
 
-const getSensorPath = () => {
-    const sensor_path = `/sys/bus/w1/devices/${deviceName}/w1_slave`;
+const getSensorPath = deviceName => {
+    const try_sensor_path = `/sys/bus/w1/devices/${deviceName}/w1_slave`;
     const mock_sensor_path = "src/server/sensorMock";
 
     try {
-        fs.accessSync(sensor_path, fs.constants.F_OK | fs.constants.R_OK);
-        return sensor_path;
+        fs.accessSync(try_sensor_path, fs.constants.F_OK | fs.constants.R_OK);
+        return try_sensor_path;
     } catch (err) {
         console.log("Cannot access sensor file, using mock");
         return mock_sensor_path;
     }
 };
-const sensor_path = getSensorPath();
 
-const getReading = async () => {
+const getExternalReading = async () => {
     try {
-        return await readSensorHW();
+        return readSensorHW(sensors.external);
     } catch (err) {
         console.log(err.message);
         return {};
     }
 };
 
-const readSensorHW = () => {
+const getInternalReading = async () => {
+    try {
+        return readSensorHW(sensors.internal);
+    } catch (err) {
+        console.log(err.message);
+        return {};
+    }
+};
+
+const readSensorHW = deviceName => {
+    const sensor_path = getSensorPath(deviceName);
+
     return new Promise((resolve, reject) => {
         try {
             fs.readFile(sensor_path, { encoding: "utf8" }, (err, data) => {
@@ -63,6 +73,6 @@ const readSensorHW = () => {
 };
 
 module.exports = {
-    sensor_path,
-    getReading
+    getInternalReading,
+    getExternalReading
 };
