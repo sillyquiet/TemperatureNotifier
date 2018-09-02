@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { Subscription } from "react-apollo";
 import gql from "graphql-tag";
 import moment from "moment";
@@ -22,6 +22,17 @@ const TEMP_SUBSCRIPTION = gql`
     }
 `;
 
+const Temperature = ({ timestamp, celsius, fahrenheit, title }) => {
+    return (
+        <div>
+            <p>{title}</p>
+            <span>{`${moment(timestamp).format("H:mm:ss")}  --  ${formatNumber(
+                celsius
+            )} °C  --  ${formatNumber(fahrenheit)} °F`}</span>
+        </div>
+    );
+};
+
 const App = () => (
     <Subscription subscription={TEMP_SUBSCRIPTION}>
         {({ loading, error, data }) => {
@@ -30,24 +41,24 @@ const App = () => (
             if (!data || !data.updatedTemp) return <p>Nothing to see yet!</p>;
             const {
                 timestamp,
-                internalTemperature: {
-                    celsius: internalCelsius,
-                    fahrenheit: internalFahrenheit
-                } = {},
-                externalTemperature: {
-                    celsius: externalCelsius,
-                    fahrenheit: externalFahrenheit
-                } = {}
+                internalTemperature = {},
+                externalTemperature = {}
             } = data.updatedTemp;
             return (
-                <div>
-                    <p>Temperature</p>
-                    <span>{`${moment(timestamp).format(
-                        "H:mm:ss"
-                    )}  --  ${formatNumber(
-                        internalCelsius
-                    )} °C  --  ${formatNumber(internalFahrenheit)} °F`}</span>
-                </div>
+                <Fragment>
+                    <Temperature
+                        title={"Internal Temperature"}
+                        timestamp={timestamp}
+                        celsius={internalTemperature.celsius}
+                        fahrenheit={internalTemperature.fahrenheit}
+                    />
+                    <Temperature
+                        title={"External Temperature"}
+                        timestamp={timestamp}
+                        celsius={externalTemperature.celsius}
+                        fahrenheit={externalTemperature.fahrenheit}
+                    />
+                </Fragment>
             );
         }}
     </Subscription>
