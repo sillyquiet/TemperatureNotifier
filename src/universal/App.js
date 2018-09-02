@@ -18,6 +18,7 @@ const TEMP_SUBSCRIPTION = gql`
                 fahrenheit
             }
             timestamp
+            fansAreOn
         }
     }
 `;
@@ -42,7 +43,8 @@ const App = () => (
             const {
                 timestamp,
                 internalTemperature = {},
-                externalTemperature = {}
+                externalTemperature = {},
+                fansAreOn
             } = data.updatedTemp;
             return (
                 <Fragment>
@@ -58,6 +60,7 @@ const App = () => (
                         celsius={externalTemperature.celsius}
                         fahrenheit={externalTemperature.fahrenheit}
                     />
+                    <span>{`Fan On: ${fansAreOn ? Yes : No}`}</span>
                 </Fragment>
             );
         }}

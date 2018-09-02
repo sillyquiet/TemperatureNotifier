@@ -9,7 +9,7 @@ const { PubSub } = require("graphql-subscriptions");
 const { execute, subscribe } = require("graphql");
 const { createServer } = require("http");
 const { SubscriptionServer } = require("subscriptions-transport-ws");
-const { initFans, fansOff, fansOn } = require("./device/fans");
+const { initFans, fansOff, fansOn, fansAreOn } = require("./device/fans");
 const { getInternalReading, getExternalReading } = require("./device/sensors");
 
 const pubsub = new PubSub();
@@ -26,6 +26,7 @@ type Query {
     internalTemperature: Temperature
     externalTemperature: Temperature
     timestamp: String
+    fansAreOn: Boolean
 }
 
 type Subscription {
@@ -66,7 +67,8 @@ const readLoop = () => {
         const updatedTemp = {
             internalTemperature,
             externalTemperature,
-            timestamp: new Date().toUTCString()
+            timestamp: new Date().toUTCString(),
+            fansAreOn: fansAreOn()
         };
         const success = pubsub.publish("tempUpdated", { updatedTemp });
         console.log("Published: ", success, updatedTemp);
