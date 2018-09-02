@@ -60,7 +60,7 @@ const App = () => (
                         celsius={externalTemperature.celsius}
                         fahrenheit={externalTemperature.fahrenheit}
                     />
-                    <span>{`Fan On: ${fansAreOn ? Yes : No}`}</span>
+                    <span>{`Fan On: ${fansAreOn ? "Yes" : "No"}`}</span>
                 </Fragment>
             );
         }}
