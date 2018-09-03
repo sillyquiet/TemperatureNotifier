@@ -1,6 +1,7 @@
 const fs = require("fs");
 
 const sensors = { external: "28-00000a29795e", internal: "28-0117b2112cff" }; // make this configurable
+let sensorPaths = {};
 
 const getSensorPath = deviceName => {
     const try_sensor_path = `/sys/bus/w1/devices/${deviceName}/w1_slave`;
@@ -33,8 +34,15 @@ const getInternalReading = async () => {
     }
 };
 
+const initSensors = () => {
+    sensorPaths = {
+        sensors.external: getSensorPath(sensors.external),
+        sensors.internal: getSensorPath(sensors.internal)
+    };
+};
+
 const readSensorHW = deviceName => {
-    const sensor_path = getSensorPath(deviceName);
+    const sensor_path = sensorPaths[deviceName] || '';
 
     return new Promise((resolve, reject) => {
         try {
@@ -74,5 +82,6 @@ const readSensorHW = deviceName => {
 
 module.exports = {
     getInternalReading,
-    getExternalReading
+    getExternalReading,
+    initSensors
 };

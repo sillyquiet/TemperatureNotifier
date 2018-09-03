@@ -10,7 +10,11 @@ const { execute, subscribe } = require("graphql");
 const { createServer } = require("http");
 const { SubscriptionServer } = require("subscriptions-transport-ws");
 const { initFans, fansOff, fansOn, fansAreOn } = require("./device/fans");
-const { getInternalReading, getExternalReading } = require("./device/sensors");
+const {
+    getInternalReading,
+    getExternalReading,
+    initSensors
+} = require("./device/sensors");
 
 const pubsub = new PubSub();
 
@@ -123,6 +127,7 @@ server.use(
 const ws = createServer(server);
 
 initFans();
+initSensors();
 
 ws.listen(PORT, () => {
     console.log(`Apollo Server is now running on http://raspberrypi:${PORT}`);
