@@ -35,14 +35,13 @@ const getInternalReading = async () => {
 };
 
 const initSensors = () => {
-    sensorPaths = {
-        sensors.external: getSensorPath(sensors.external),
-        sensors.internal: getSensorPath(sensors.internal)
-    };
+    sensorPaths = {};
+    sensorPaths[sensors.external] = getSensorPath(sensors.external);
+    sensorPaths[sensors.internal] = getSensorPath(sensors.internal);
 };
 
 const readSensorHW = deviceName => {
-    const sensor_path = sensorPaths[deviceName] || '';
+    const sensor_path = sensorPaths[deviceName] || "";
 
     return new Promise((resolve, reject) => {
         try {
