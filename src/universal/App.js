@@ -1,11 +1,10 @@
-import React, { Fragment } from "react";
+import React from "react";
 import { Subscription } from "react-apollo";
 import gql from "graphql-tag";
 import moment from "moment";
-
 import "./App.css";
+import Temperature from "./Temperature";
 
-const formatNumber = raw => raw.toFixed(1);
 const TEMP_SUBSCRIPTION = gql`
     subscription tempUpdated {
         updatedTemp {
@@ -23,14 +22,35 @@ const TEMP_SUBSCRIPTION = gql`
     }
 `;
 
-const Temperature = ({ timestamp, celsius, fahrenheit, title }) => {
+const timestampStyle = {
+    fontSize: "18px",
+    fontWeight: "800",
+    flex: "0 0 10%"
+};
+
+const containerStyle = {
+    display: "flex",
+    flexFlow: "row wrap",
+    justifyContent: "space-evenly",
+    alignItems: "center"
+};
+
+const tempContainerStyle = {
+    display: "flex",
+    flexFlow: "row nowrap",
+    justifyContent: "space-between",
+    flex: "0 0 auto"
+};
+
+const Fans = ({ fansAreOn }) => {
+    return <span>{`Fan On: ${fansAreOn ? "Yes" : "No"}`}</span>;
+};
+
+const Timestamp = ({ timestamp }) => {
     return (
-        <div>
-            <h3>{title}</h3>
-            <span>{`${moment(timestamp).format("H:mm:ss")}  --  ${formatNumber(
-                celsius
-            )} °C  --  ${formatNumber(fahrenheit)} °F`}</span>
-        </div>
+        <span style={timestampStyle}>
+            {moment(timestamp).format("HH:MM:SS")}
+        </span>
     );
 };
 
@@ -47,21 +67,22 @@ const App = () => (
                 fansAreOn
             } = data.updatedTemp;
             return (
-                <Fragment>
-                    <Temperature
-                        title={"Internal Temperature"}
-                        timestamp={timestamp}
-                        celsius={internalTemperature.celsius}
-                        fahrenheit={internalTemperature.fahrenheit}
-                    />
-                    <Temperature
-                        title={"External Temperature"}
-                        timestamp={timestamp}
-                        celsius={externalTemperature.celsius}
-                        fahrenheit={externalTemperature.fahrenheit}
-                    />
-                    <span>{`Fan On: ${fansAreOn ? "Yes" : "No"}`}</span>
-                </Fragment>
+                <div style={containerStyle}>
+                    <Timestamp timestamp={timestamp} />
+                    <div style={tempContainerStyle}>
+                        <Temperature
+                            title={"Internal Temperature"}
+                            timestamp={timestamp}
+                            temperature={internalTemperature}
+                        />
+                        <Temperature
+                            title={"External Temperature"}
+                            timestamp={timestamp}
+                            temperature={externalTemperature}
+                        />
+                    </div>
+                    <Fans fansAreOn={fansAreOn} />
+                </div>
             );
         }}
     </Subscription>
