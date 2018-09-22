@@ -45,8 +45,9 @@ schema {
 let timer;
 
 const timestamp = () => new Date().toUTCString();
-const tempsAreEqual = (a, b) =>
-    new Number(a).toFixed(1).toString() !== new Number(b).toFixed(1).toString();
+const tempsAreEqual = (a, b, precision = 1) =>
+    new Number(a).toFixed(precision).toString() !==
+    new Number(b).toFixed(precision).toString();
 
 let prevReading;
 
