@@ -44,7 +44,6 @@ schema {
 ];
 let timer;
 
-const timestamp = () => new Date().toUTCString();
 const tempsAreEqual = (a, b, precision = 1) =>
     new Number(a).toFixed(precision).toString() !==
     new Number(b).toFixed(precision).toString();
@@ -60,12 +59,12 @@ const readLoop = () => {
         counter++;
         const internalTemperature = await getInternalReading();
         const externalTemperature = await getExternalReading();
-        const temperatureDiffence =
+        const temperatureDifference =
             internalTemperature.celsius - externalTemperature.celsius;
         const fanLoop = counter !== 0 && counter % 10 === 0;
-        if (fanLoop && temperatureDiffence > THRESHOLD) {
+        if (fanLoop && temperatureDifference > THRESHOLD) {
             fansOn();
-        } else if (fanLoop && temperatureDiffence <= THRESHOLD) {
+        } else if (fanLoop && temperatureDifference <= THRESHOLD) {
             fansOff();
         }
         prevReading = internalTemperature.celsius;

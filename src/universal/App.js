@@ -49,7 +49,7 @@ const Fans = ({ fansAreOn }) => {
 const Timestamp = ({ timestamp }) => {
     return (
         <span style={timestampStyle}>
-            {moment(timestamp).format("HH:MM:SS")}
+            {moment(timestamp).format("HH:mm:ss")}
         </span>
     );
 };
