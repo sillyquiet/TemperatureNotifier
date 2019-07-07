@@ -31,7 +31,7 @@ const Temperature = ({
     title = "",
     units = UNITS.fahrenheit
 }) => {
-    const temp = units === units.fahrenheit ? fahrenheit : celsius;
+    const temp = units === UNITS.fahrenheit ? fahrenheit : celsius;
     const abbrev = UNIT_ABBREVIATIONS[units];
 
     return (
