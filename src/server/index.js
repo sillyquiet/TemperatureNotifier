@@ -78,6 +78,7 @@ const readLoop = () => {
         ) {
             fansOn();
             fanState = FAN_STATE_ON;
+            counter = 0;
         } else if (
             fanLoop &&
             (isFanControlOff ||
@@ -85,6 +86,7 @@ const readLoop = () => {
         ) {
             fansOff();
             fanState = FAN_STATE_OFF;
+            counter = 0;
         }
 
         const updatedTemp = {
