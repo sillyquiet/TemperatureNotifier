@@ -11,8 +11,8 @@ import { split } from "apollo-link";
 import { HttpLink } from "apollo-link-http";
 import { getMainDefinition } from "apollo-utilities";
 
-const HOST = "raspberrypi";
-//const HOST = "localhost";
+// const HOST = "raspberrypi";
+const HOST = "localhost";
 const PORT = 4000;
 
 const wsLink = new WebSocketLink({

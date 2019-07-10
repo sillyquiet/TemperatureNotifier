@@ -10,11 +10,11 @@ const { execute, subscribe } = require("graphql");
 const { createServer } = require("http");
 const { SubscriptionServer } = require("subscriptions-transport-ws");
 const { initFans, fansOff, fansOn, fansAreOn } = require("./device/fans");
-const {
-    getInternalReading,
-    getExternalReading,
-    initSensors
-} = require("./device/sensors");
+const { getExternalReading, initSensors } = require("./device/sensors");
+const FAN_STATE_OFF = "OFF";
+const FAN_STATE_ON = "ON";
+const FAN_STATE_AUTO = "AUTO";
+const FAN_STATES = [FAN_STATE_OFF, FAN_STATE_ON, FAN_STATE_AUTO];
 
 const pubsub = new PubSub();
 
@@ -27,10 +27,17 @@ type Temperature {
 }
 
 type Query {
-    internalTemperature: Temperature
-    externalTemperature: Temperature
+    temperature: Temperature
     timestamp: String
-    fansAreOn: Boolean
+    currentFanState: String
+    currentFanControlState: String
+    allFanControlStates: [String]
+    setPoint: Float
+}
+
+type Mutation {
+    toggleFans (fanState: String): String
+    setSetPoint (setPoint: Float): Float
 }
 
 type Subscription {
@@ -40,39 +47,51 @@ type Subscription {
 schema {
   query: Query
   subscription: Subscription
+  mutation: Mutation
 }`
 ];
+
 let timer;
 
 const tempsAreEqual = (a, b, precision = 1) =>
     new Number(a).toFixed(precision).toString() !==
     new Number(b).toFixed(precision).toString();
 
-let prevReading;
-
 let counter;
-const THRESHOLD = 12.0;
+let setPoint = 100.0;
+let fanState = FAN_STATE_OFF;
+let fanControlState = FAN_STATE_AUTO;
 
 const readLoop = () => {
     counter = 0;
     timer = setInterval(async () => {
         counter++;
-        const internalTemperature = await getInternalReading();
         const externalTemperature = await getExternalReading();
-        const temperatureDifference =
-            internalTemperature.celsius - externalTemperature.celsius;
+        const temperatureDifference = setPoint - externalTemperature.celsius;
         const fanLoop = counter !== 0 && counter % 10 === 0;
-        if (fanLoop && temperatureDifference > THRESHOLD) {
+        const isFanControlOn = fanControlState === FAN_STATE_ON;
+        const isFanControlOff = fanControlState === FAN_STATE_OFF;
+        const isFanControlAuto = fanControlState === FAN_STATE_AUTO;
+        if (
+            fanLoop &&
+            (isFanControlOn || (isFanControlAuto && temperatureDifference < 0))
+        ) {
             fansOn();
-        } else if (fanLoop && temperatureDifference <= THRESHOLD) {
+            fanState = FAN_STATE_ON;
+        } else if (
+            fanLoop &&
+            (isFanControlOff ||
+                (isFanControlAuto && temperatureDifference >= 0))
+        ) {
             fansOff();
+            fanState = FAN_STATE_OFF;
         }
-        prevReading = internalTemperature.celsius;
+
         const updatedTemp = {
-            internalTemperature,
-            externalTemperature,
+            temperature: externalTemperature,
             timestamp: new Date().toUTCString(),
-            fansAreOn: fansAreOn()
+            fansAreOn: fansAreOn(),
+            allFanControlStates: FAN_STATES
         };
         const success = pubsub.publish("tempUpdated", { updatedTemp });
         console.log("Published: ", success, updatedTemp);
@@ -81,14 +100,32 @@ const readLoop = () => {
 
 const resolvers = {
     Query: {
-        internalTemperature() {
-            return getInternalReading();
-        },
-        externalTemperature() {
+        temperature() {
             return getExternalReading();
         },
         timestamp() {
             return new Date().toUTCString();
+        },
+        currentFanState() {
+            return fanState;
+        },
+        currentFanControlState() {
+            return fanControlState;
+        },
+        allFanControlStates() {
+            return FAN_STATES;
+        }
+    },
+    Mutation: {
+        toggleFans(_, args) {
+            const { fanState } = args;
+            fanControlState = fanState;
+            return fanControlState;
+        },
+        setSetPoint(_, args) {
+            const { setPoint: newSetPoint } = args;
+            setPoint = newSetPointl;
+            return setPoint;
         }
     },
     Subscription: {
