@@ -126,7 +126,7 @@ const resolvers = {
         },
         setSetPoint(_, args) {
             const { setPoint: newSetPoint } = args;
-            setPoint = newSetPointl;
+            setPoint = newSetPoint;
             return setPoint;
         }
     },
