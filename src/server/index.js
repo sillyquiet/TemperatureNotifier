@@ -58,7 +58,7 @@ const tempsAreEqual = (a, b, precision = 1) =>
     new Number(b).toFixed(precision).toString();
 
 let counter;
-let setPoint = 100.0;
+let setPoint = 30.0;
 let fanState = FAN_STATE_OFF;
 let fanControlState = FAN_STATE_AUTO;
 

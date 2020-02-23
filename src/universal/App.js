@@ -66,14 +66,12 @@ const App = () => (
     <Query query={TEMP_QUERY}>
         {({ loading, error, data, subscribeToMore }) => {
             if (loading) return <p>Loading...</p>;
-            if (error) return <p>Error :(</p>;
-            if (!data) return <p>Nothing to see yet!</p>;
             const {
-                timestamp,
+                timestamp = Date.now(),
                 temperature = {},
                 currentFanState,
                 currentFanControlState
-            } = data;
+            } = data || {};
             return (
                 <Mutation
                     mutation={TEMP_TOGGLE_FANS_MUTATON}
