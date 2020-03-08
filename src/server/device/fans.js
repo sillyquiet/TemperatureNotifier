@@ -1,7 +1,9 @@
 let Gpio;
 try {
     Gpio = require("onoff").Gpio;
-} catch (err) {}
+} catch (err) {
+    console.log("Could not load onoff", err);
+}
 
 let fans;
 

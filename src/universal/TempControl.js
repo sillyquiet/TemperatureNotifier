@@ -58,12 +58,14 @@ export default class TempControl extends Component {
     handleInputClick(event) {
         const { onFanStateChange } = this.props;
         const newFanState =
-            (event && event.currentTarget && event.currentTarget.value) ||
-            FAN_STATE_OFF;
-        onFanStateChange({
-            variables: { fanState: newFanState },
-            optimisticResponse: { toggleFans: newFanState }
-        });
+            event && event.currentTarget && event.currentTarget.value;
+
+        if (newFanState) {
+            onFanStateChange({
+                variables: { fanState: newFanState },
+                optimisticResponse: { toggleFans: newFanState }
+            });
+        }
     }
 
     render() {
