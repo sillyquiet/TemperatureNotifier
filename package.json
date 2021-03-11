@@ -47,7 +47,7 @@
     "raf": "3.4.0",
     "react": "^16.4.1",
     "react-apollo": "^2.5.8",
-    "react-dev-utils": "^5.0.1",
+    "react-dev-utils": "^11.0.4",
     "react-dom": "^16.4.1",
     "resolve": "1.6.0",
     "sqlite3": "^4.0.1",
